@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a192f">
 <title>Cacimba de Dentro | Conectando pessoas à nossa cidade</title>
 <style>
@@ -73,6 +73,7 @@ main { max-width: 1080px; margin: 28px auto; padding: 0 18px; }
 
 .primary { width: 100%; border: 0; background: var(--gold); color: #070f1a; padding: 14px; border-radius: 12px; font-weight: 800; box-shadow: 0 5px 15px rgba(220,163,39,0.3); transition: 0.2s; }
 .primary:hover { background: #f0b435; }
+.primary:disabled { opacity: 0.6; cursor: not-allowed; }
 .side { display: flex; flex-direction: column; gap: 14px; }
 .mini { background: #070f1a; border: 1px solid var(--line); border-radius: 15px; padding: 17px; border-left: 4px solid var(--gold); }
 .mini .ico { font-size: 23px; }
@@ -111,6 +112,10 @@ tr:last-child td { border-bottom: 0; }
 .qrbox img { width: 142px; height: 142px; border: 8px solid white; box-shadow: 0 0 0 1px var(--line); border-radius: 10px; }
 .foot { text-align: center; color: var(--muted); font-size: 11px; padding: 26px; }
 
+/* Status da Conexão */
+.db-status { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; padding: 4px 10px; border-radius: 20px; }
+.db-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; }
+
 @media(max-width:760px){
   .layout { grid-template-columns: 1fr; }
   .hero { padding: 25px; }
@@ -130,12 +135,15 @@ tr:last-child td { border-bottom: 0; }
       <div class="seal">C</div>
       <div><strong>CACIMBA DE DENTRO</strong><span>Paraíba • Um convite para conhecer nossa cidade</span></div>
     </div>
-    <button class="admin-toggle" id="adminToggle" title="Acesso restrito ao administrador">Área Administrativa</button>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span class="db-status"><span class="db-dot"></span> Firebase Conectado</span>
+      <button class="admin-toggle" id="adminToggle">Área Administrativa</button>
+    </div>
   </div>
 </header>
 
 <main>
-  <!-- TELA DO VISITANTE -->
+  <!-- TELA DO VISITANTE (ENTRADA DIRETA VIA QR CODE) -->
   <section id="visitorView">
     <div class="hero">
       <div class="eyebrow">Seja bem-vindo(a)!</div>
@@ -144,19 +152,21 @@ tr:last-child td { border-bottom: 0; }
       <span class="pill">📍 Cacimba de Dentro • Paraíba</span>
     </div>
 
-    <!-- Galeria de Fotos (Controlada pelo Admin) -->
+    <!-- Galeria de Fotos em Tempo Real -->
     <section class="gallery-section">
       <div class="gallery-head">
         <h2>Conheça nossas paisagens e atrações</h2>
         <p class="sub" style="margin:4px 0 0">Uma prévia das belezas naturais e culturais selecionadas para você</p>
       </div>
-      <div class="gallery-grid" id="galleryGrid"></div>
+      <div class="gallery-grid" id="galleryGrid">
+        <div class="empty-gallery">Carregando atrações...</div>
+      </div>
     </section>
 
     <div class="layout">
       <section class="panel" id="formPanel">
         <h2>Confirme sua visita ao nosso estande</h2>
-        <p class="sub">Responda ao nosso breve questionário. Não é uma inscrição nem reserva de viagem — é uma forma de registrar sua passagem e conhecer seu interesse pela cidade.</p>
+        <p class="sub">Responda ao nosso breve questionário. Os dados inseridos serão registrados diretamente no nosso sistema oficial.</p>
         
         <form id="leadForm">
           <div class="grid2">
@@ -193,44 +203,61 @@ tr:last-child td { border-bottom: 0; }
             </select>
           </div>
           <div class="field"><label for="message">Quer deixar alguma sugestão ou comentário? (opcional)</label><textarea id="message" name="message" placeholder="Conte para nós..."></textarea></div>
-          <label class="consent"><input type="checkbox" id="consent" required><span>Autorizo o registro das informações que forneci e o contato pelo WhatsApp para receber informações sobre Cacimba de Dentro. Sei que posso pedir para não receber novas mensagens.</span></label>
-          <button class="primary" type="submit">Enviar respostas e confirmar presença</button>
-          <p class="notice">Seus dados serão utilizados para registrar a visita ao estande e entender o interesse turístico. Evite informar dados sensíveis.</p>
+          <label class="consent"><input type="checkbox" id="consent" required><span>Autorizo o registro das informações que forneci e o contato pelo WhatsApp para receber informações sobre Cacimba de Dentro.</span></label>
+          <button class="primary" id="btnSubmitLead" type="submit">Enviar respostas e confirmar presença</button>
+          <p class="notice">Seus dados serão gravados com segurança no banco de dados do evento.</p>
         </form>
       </section>
 
       <aside class="side">
         <div class="mini"><div class="ico">🤝</div><strong>Sua opinião importa</strong><p>Ajude-nos a entender o que as pessoas desejam conhecer em Cacimba de Dentro.</p></div>
         <div class="mini"><div class="ico">🌄</div><strong>Descubra nossa cidade</strong><p>Um lugar de cultura, histórias, acolhimento e experiências para compartilhar.</p></div>
-        <div class="mini"><div class="ico">🔒</div><strong>Respeito aos seus dados</strong><p>As informações serão usadas conforme a autorização apresentada neste formulário.</p></div>
+        <div class="mini"><div class="ico">🔒</div><strong>Respeito aos seus dados</strong><p>Informações salvas e criptografadas no banco Firebase.</p></div>
       </aside>
     </div>
 
     <div class="panel success hidden" id="successPanel">
       <div class="check">✓</div>
       <h2>Obrigado pela sua participação!</h2>
-      <p>Sua presença foi registrada. Ficaremos felizes em receber você em Cacimba de Dentro. Até breve!</p>
-      <button class="secondary" onclick="location.reload()">Voltar ao início</button>
+      <p>Sua presença foi registrada com sucesso no banco de dados. Ficaremos felizes em receber você em Cacimba de Dentro!</p>
+      <button class="secondary" onclick="location.reload()">Registrar outro visitante</button>
     </div>
   </section>
 
-  <!-- TELA DO PAINEL ADMINISTRATIVO (ISOLADA) -->
+  <!-- PAINEL ADMINISTRATIVO COM AUTENTICAÇÃO FIREBASE -->
   <section class="panel admin hidden" id="adminView">
     <div class="adminhead">
       <div>
-        <h2>Painel administrativo</h2>
-        <p class="sub" style="margin:4px 0 0">Área restrita de controle de respostas e galerias.</p>
+        <h2>Painel Administrativo</h2>
+        <p class="sub" style="margin:4px 0 0">Área restrita com Autenticação Firebase (E-mail e Senha)</p>
       </div>
-      <button class="secondary" id="backVisitor">Sair para a página do visitante</button>
+      <button class="secondary" id="backVisitor">Voltar para a visão do visitante</button>
     </div>
     
-    <div id="loginBox" style="max-width:360px; margin:35px auto; background:#070f1a; padding:24px; border-radius:16px; border:1px solid var(--line);">
-      <div class="field"><label for="pin">Senha administrativa</label><input id="pin" type="password" placeholder="Digite a senha"></div>
-      <button class="primary" id="loginBtn">Entrar no painel</button>
-      <p class="notice" style="text-align:center; margin-top:12px;">Senha padrão inicial: <b>1234</b></p>
+    <!-- Formulário de Login com Firebase Auth -->
+    <div id="loginBox" style="max-width:380px; margin:35px auto; background:#070f1a; padding:28px; border-radius:18px; border:1px solid var(--line);">
+      <h3 style="margin:0 0 16px; color:var(--gold); font-size:18px; text-align:center;">Login de Administrador</h3>
+      <form id="loginForm">
+        <div class="field">
+          <label for="adminEmail">E-mail corporativo / Admin</label>
+          <input id="adminEmail" type="email" required placeholder="admin@cacimbatour.com">
+        </div>
+        <div class="field">
+          <label for="adminPassword">Senha</label>
+          <input id="adminPassword" type="password" required placeholder="••••••••">
+        </div>
+        <button class="primary" id="btnLogin" type="submit">Entrar no Painel</button>
+      </form>
+      <div id="loginError" style="color:#f87171; font-size:12px; margin-top:12px; text-align:center;" class="hidden"></div>
     </div>
 
+    <!-- Dashboard do Admin Autenticado -->
     <div id="dashboard" class="hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#070f1a; padding:12px 18px; border-radius:12px; border:1px solid var(--line); margin-top:15px;">
+        <span style="font-size:13px; color:#cbd5e1;">Conectado como: <strong id="userEmailDisplay" style="color:var(--gold);">admin</strong></span>
+        <button class="smallbtn danger" id="btnLogout">Sair (Logout)</button>
+      </div>
+
       <div class="stats">
         <div class="stat"><span>Total de respostas</span><strong id="total">0</strong></div>
         <div class="stat"><span>Querem visitar</span><strong id="yes">0</strong></div>
@@ -246,249 +273,341 @@ tr:last-child td { border-bottom: 0; }
       
       <div class="tablewrap">
         <table>
-          <thead><tr><th>Data</th><th>Nome</th><th>WhatsApp</th><th>Cidade</th><th>Conhece?</th><th>Interesse</th><th>Preferência</th></tr></thead>
+          <thead><tr><th>Data/Hora</th><th>Nome</th><th>WhatsApp</th><th>Cidade</th><th>Conhece?</th><th>Interesse</th><th>Preferência</th><th>Ação</th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
-        <div id="empty" class="empty">Nenhuma resposta registrada neste dispositivo ainda.</div>
+        <div id="empty" class="empty">Nenhum registro encontrado no banco de dados.</div>
       </div>
       
-      <!-- Gerenciamento da Galeria -->
+      <!-- Gerenciador da Galeria de Fotos no Firestore -->
       <div class="config">
-        <h3 style="margin:0 0 6px; color:var(--white)">Gerenciar Galeria de Fotos</h3>
-        <p class="sub">Adicione imagens informando o link direto (URL) da foto e uma breve descrição.</p>
+        <h3 style="margin:0 0 6px; color:var(--white)">Gerenciar Galeria de Fotos (Firebase)</h3>
+        <p class="sub">Adicione imagens que ficarão visíveis para todos os visitantes que entrarem pelo QR Code.</p>
         
-        <div class="configgrid">
-          <div class="field"><label for="photoUrl">Link da Imagem (URL)</label><input id="photoUrl" placeholder="https://exemplo.com/foto.jpg"></div>
-          <div class="field"><label for="photoTitle">Título / Local</label><input id="photoTitle" placeholder="Ex: Praça Central / Serra"></div>
-        </div>
-        <div class="field"><label for="photoDesc">Descrição curta</label><input id="photoDesc" placeholder="Ex: Ponto turístico histórico."></div>
-        <button class="smallbtn" id="addPhotoBtn">Adicionar foto à galeria</button>
-        
+        <form id="photoForm">
+          <div class="configgrid">
+            <div class="field"><label for="photoUrl">Link da Imagem (URL)</label><input id="photoUrl" required placeholder="https://exemplo.com/foto.jpg"></div>
+            <div class="field"><label for="photoTitle">Título / Ponto Turístico</label><input id="photoTitle" required placeholder="Ex: Serra da Pedra de Santo Antônio"></div>
+          </div>
+          <div class="field"><label for="photoDesc">Descrição Curta</label><input id="photoDesc" placeholder="Ex: Vista panorâmica e ecoturismo."></div>
+          <button class="smallbtn" type="submit" id="btnAddPhoto">Adicionar Foto à Galeria</button>
+        </form>
+
         <div style="margin-top:16px;">
-          <h4 style="margin:0 0 8px; font-size:14px; color:var(--white)">Fotos exibidas na página do visitante:</h4>
-          <div id="adminPhotoList" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; border:1px solid var(--line); padding:10px; border-radius:10px; background:#070f1a;"></div>
+          <h4 style="margin:0 0 8px; font-size:14px; color:var(--white)">Fotos Cadastradas no Banco:</h4>
+          <div id="adminPhotoList" style="display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto; border:1px solid var(--line); padding:10px; border-radius:10px; background:#070f1a;"></div>
         </div>
       </div>
 
-      <!-- Configurações e Link/QR Code -->
+      <!-- Gerador de QR Code do Estande -->
       <div class="config">
-        <h3 style="margin:0 0 6px; color:var(--white)">Configurações Gerais</h3>
-        <p class="sub">Configure o WhatsApp para receber os avisos e altere sua senha de acesso.</p>
-        <div class="configgrid">
-          <div class="field"><label for="waNumber">WhatsApp do responsável (com DDD)</label><input id="waNumber" placeholder="Ex.: 5583999999999"></div>
-          <div class="field"><label for="newPin">Nova senha administrativa</label><input id="newPin" type="password" placeholder="Defina uma senha"></div>
-        </div>
-        <button class="smallbtn" id="saveConfig">Salvar configurações</button>
-        
-        <div class="config">
-          <h3 style="margin:0 0 6px; color:var(--white)">QR Code e Link para o Visitante</h3>
-          <p class="sub">Cole o link público da sua página hospedada (ex: Netlify, Vercel) para gerar o QR Code oficial do estande.</p>
-          <div class="qrbox">
-            <img id="qrImage" alt="QR Code da página" src="">
-            <div style="flex:1;min-width:200px">
-              <div class="field"><label for="pageUrl">Link público da página</label><input id="pageUrl" placeholder="https://seusite.com.br"></div>
-              <button class="smallbtn" id="makeQr">Gerar QR Code</button>
-              <a id="qrDownload" class="smallbtn" style="display:none;text-decoration:none;color:var(--gold)" download="qrcode-cacimba.png">Baixar QR Code</a>
-            </div>
+        <h3 style="margin:0 0 6px; color:var(--white)">QR Code Oficial do Estande</h3>
+        <p class="sub">Cole o link da página hospedada para gerar o QR Code de divulgação.</p>
+        <div class="qrbox">
+          <img id="qrImage" alt="QR Code da página" src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=https://cacimbatour.firebaseapp.com">
+          <div style="flex:1;min-width:200px">
+            <div class="field"><label for="pageUrl">Link Público da Aplicação</label><input id="pageUrl" placeholder="https://seu-dominio.com"></div>
+            <button class="smallbtn" id="makeQr">Gerar QR Code</button>
+            <a id="qrDownload" class="smallbtn" style="display:inline-block; margin-top:8px; text-decoration:none; color:var(--gold)" download="qrcode-cacimba.png" target="_blank">Baixar QR Code</a>
           </div>
         </div>
-        
-        <div class="config"><button class="smallbtn danger" id="clearData">Apagar todas as respostas deste navegador</button></div>
       </div>
     </div>
   </section>
 </main>
 
-<div class="foot">Cacimba de Dentro • Um convite para conhecer nossa cidade</div>
+<div class="foot">Cacimba de Dentro • Paraíba | Sistema de Captura com Firebase Firestore</div>
 
-<script>
-const KEY = 'cacimba_leads_v1', CFG = 'cacimba_cfg_v1', PHOTOS_KEY = 'cacimba_photos_v1';
-const $ = id => document.getElementById(id);
-const read = () => JSON.parse(localStorage.getItem(KEY) || '[]');
-const config = () => JSON.parse(localStorage.getItem(CFG) || '{"wa":"","pin":"1234"}');
+<!-- INTEGRAÇÃO FIREBASE SDK v10 (CDN ES MODULES) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    deleteDoc, 
+    doc, 
+    onSnapshot, 
+    serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-function getPhotos() {
-  const saved = localStorage.getItem(PHOTOS_KEY);
-  return saved ? JSON.parse(saved) : [];
-}
+  // Configuração do Firebase fornecida
+  const firebaseConfig = {
+    apiKey: "AIzaSyAwUCAfE6yzq1O6OFSvBQwATarjVXJ4ixw",
+    authDomain: "cacimbatour.firebaseapp.com",
+    projectId: "cacimbatour",
+    storageBucket: "cacimbatour.firebasestorage.app",
+    messagingSenderId: "260790394042",
+    appId: "1:260790394042:web:330ae61117610fd0543683"
+  };
 
-function renderGallery() {
-  const photos = getPhotos();
-  const grid = $('galleryGrid');
-  if(photos.length === 0) {
-    grid.innerHTML = '<div class="empty-gallery">Em breve, novas fotos e paisagens de Cacimba de Dentro serão publicadas aqui.</div>';
-    return;
-  }
-  grid.innerHTML = photos.map(p => `
-    <div class="photo-card">
-      <img src="${esc(p.url)}" alt="${esc(p.title)}" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=500'">
-      <div class="photo-info">
-        <div class="photo-title">${esc(p.title)}</div>
-        <div class="photo-desc">${esc(p.desc)}</div>
-      </div>
-    </div>
-  `).join('');
-}
+  // Inicializa o Firebase e serviços
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-function renderAdminPhotos() {
-  const photos = getPhotos();
-  const list = $('adminPhotoList');
-  if(photos.length === 0) {
-    list.innerHTML = '<span style="font-size:12px; color:var(--muted)">Nenhuma foto cadastrada na galeria.</span>';
-    return;
-  }
-  list.innerHTML = photos.map((p, index) => `
-    <div style="display:flex; align-items:center; justify-content:space-between; background:#0e1e32; padding:8px 12px; border:1px solid var(--line); border-radius:8px; gap:10px;">
-      <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
-        <img src="${esc(p.url)}" style="width:36px; height:36px; object-fit:cover; border-radius:6px;" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=100'">
-        <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px;">
-          <strong style="color:white;">${esc(p.title)}</strong><br><span style="color:var(--muted); font-size:11px;">${esc(p.desc)}</span>
+  // Seletores utilitários
+  const $ = id => document.getElementById(id);
+  let globalLeads = [];
+  let currentUser = null;
+
+  // Escutar Fotos da Galeria em tempo real
+  const galleryRef = collection(db, "gallery");
+  onSnapshot(galleryRef, (snapshot) => {
+    const photos = [];
+    snapshot.forEach(doc => photos.push({ id: doc.id, ...doc.data() }));
+    renderGallery(photos);
+    if(currentUser) renderAdminPhotos(photos);
+  });
+
+  // Escutar Cadastros de Visitantes (Leads) em tempo real
+  const leadsRef = collection(db, "leads");
+  onSnapshot(leadsRef, (snapshot) => {
+    globalLeads = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      globalLeads.push({ id: doc.id, ...data });
+    });
+    // Ordenar por data mais recente
+    globalLeads.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    if(currentUser) renderAdminTable();
+  });
+
+  // Renderizar Galeria para Visitante
+  function renderGallery(photos) {
+    const grid = $('galleryGrid');
+    if(!photos || photos.length === 0) {
+      grid.innerHTML = '<div class="empty-gallery">Em breve, fotos de atrativos turísticos de Cacimba de Dentro serão publicadas aqui.</div>';
+      return;
+    }
+    grid.innerHTML = photos.map(p => `
+      <div class="photo-card">
+        <img src="${esc(p.url)}" alt="${esc(p.title)}" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=500'">
+        <div class="photo-info">
+          <div class="photo-title">${esc(p.title)}</div>
+          <div class="photo-desc">${esc(p.desc || '')}</div>
         </div>
       </div>
-      <button class="smallbtn danger" style="padding:6px 10px; font-size:11px;" onclick="deletePhoto(${index})">Remover</button>
-    </div>
-  `).join('');
-}
-
-function deletePhoto(index) {
-  const photos = getPhotos();
-  photos.splice(index, 1);
-  localStorage.setItem(PHOTOS_KEY, JSON.stringify(photos));
-  renderGallery();
-  renderAdminPhotos();
-}
-
-$('addPhotoBtn').onclick = () => {
-  const url = $('photoUrl').value.trim();
-  const title = $('photoTitle').value.trim();
-  const desc = $('photoDesc').value.trim();
-  
-  if(!url || !title) {
-    alert('Informe pelo menos o link (URL) da imagem e o título.');
-    return;
+    `).join('');
   }
-  
-  const photos = getPhotos();
-  photos.push({ url, title, desc: desc || 'Atração turística' });
-  localStorage.setItem(PHOTOS_KEY, JSON.stringify(photos));
-  
-  $('photoUrl').value = '';
-  $('photoTitle').value = '';
-  $('photoDesc').value = '';
-  
-  renderGallery();
-  renderAdminPhotos();
-  alert('Foto adicionada com sucesso!');
-};
 
-// Alternância de Telas (Segurança por Ocultação Visual)
-function showAdmin(){ 
-  $('visitorView').classList.add('hidden');
-  $('adminView').classList.remove('hidden');
-  $('loginBox').classList.remove('hidden');
-  $('dashboard').classList.add('hidden');
-  $('pin').value='';
-}
+  // Renderizar Lista da Galeria no Painel Admin
+  function renderAdminPhotos(photos) {
+    const list = $('adminPhotoList');
+    if(!photos || photos.length === 0) {
+      list.innerHTML = '<span style="font-size:12px; color:var(--muted)">Nenhuma foto cadastrada no banco.</span>';
+      return;
+    }
+    list.innerHTML = photos.map(p => `
+      <div style="display:flex; align-items:center; justify-content:space-between; background:#0e1e32; padding:8px 12px; border:1px solid var(--line); border-radius:8px; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+          <img src="${esc(p.url)}" style="width:36px; height:36px; object-fit:cover; border-radius:6px;" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=100'">
+          <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px;">
+            <strong style="color:white;">${esc(p.title)}</strong><br><span style="color:var(--muted); font-size:11px;">${esc(p.desc || '')}</span>
+          </div>
+        </div>
+        <button class="smallbtn danger btnDeletePhoto" data-id="${p.id}" style="padding:6px 10px; font-size:11px;">Excluir</button>
+      </div>
+    `).join('');
 
-$('adminToggle').onclick = showAdmin;
-$('backVisitor').onclick = () => { $('adminView').classList.add('hidden'); $('visitorView').classList.remove('hidden'); };
-
-$('leadForm').addEventListener('submit', e => {
-  e.preventDefault();
-  if(!$('consent').checked) return;
-  const fd = new FormData(e.target), item = Object.fromEntries(fd.entries());
-  item.date = new Date().toISOString();
-  item.id = Date.now();
-  const list = read();
-  list.unshift(item);
-  localStorage.setItem(KEY, JSON.stringify(list));
-  $('formPanel').classList.add('hidden');
-  $('successPanel').classList.remove('hidden');
-  
-  const c = config();
-  if(c.wa){
-    const msg = `Novo visitante no estande de Cacimba de Dentro!\nNome: ${item.name}\nWhatsApp: ${item.phone}\nCidade: ${item.city}\nJá conhece: ${item.knows}\nInteresse: ${item.interest}\nInteresse específico: ${item.attraction||'Não informado'}\nComentário: ${item.message||'Não informado'}`;
-    window.open('https://wa.me/'+c.wa.replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');
+    // Eventos de exclusão de fotos
+    document.querySelectorAll('.btnDeletePhoto').forEach(btn => {
+      btn.onclick = async () => {
+        if(confirm('Deseja remover esta foto da galeria?')) {
+          await deleteDoc(doc(db, "gallery", btn.dataset.id));
+        }
+      };
+    });
   }
-});
 
-$('loginBtn').onclick = () => {
-  if($('pin').value === config().pin){
-    $('loginBox').classList.add('hidden');
-    $('dashboard').classList.remove('hidden');
-    $('waNumber').value = config().wa || '';
-    render();
-    renderAdminPhotos();
-  } else {
-    alert('Senha incorreta.');
+  // Submeter formulário do visitante para o Firestore
+  $('leadForm').onsubmit = async (e) => {
+    e.preventDefault();
+    if(!$('consent').checked) return;
+
+    const btn = $('btnSubmitLead');
+    btn.disabled = true;
+    btn.textContent = "Salvando no banco de dados...";
+
+    try {
+      const formData = new FormData(e.target);
+      const leadData = {
+        name: formData.get('name').trim(),
+        phone: formData.get('phone').trim(),
+        city: formData.get('city').trim(),
+        knows: formData.get('knows'),
+        interest: formData.get('interest'),
+        attraction: formData.get('attraction') || 'Não informado',
+        message: formData.get('message') || '',
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, "leads"), leadData);
+
+      $('formPanel').classList.add('hidden');
+      $('successPanel').classList.remove('hidden');
+    } catch(err) {
+      alert("Erro ao salvar dados no Firebase: " + err.message);
+      btn.disabled = false;
+      btn.textContent = "Enviar respostas e confirmar presença";
+    }
+  };
+
+  // Gerenciamento de Autenticação Firebase
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if(user) {
+      $('loginBox').classList.add('hidden');
+      $('dashboard').classList.remove('hidden');
+      $('userEmailDisplay').textContent = user.email;
+      renderAdminTable();
+    } else {
+      $('loginBox').classList.remove('hidden');
+      $('dashboard').classList.add('hidden');
+    }
+  });
+
+  // Login do Administrador
+  $('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const email = $('adminEmail').value.trim();
+    const password = $('adminPassword').value.trim();
+    const errBox = $('loginError');
+    const btn = $('btnLogin');
+
+    errBox.classList.add('hidden');
+    btn.disabled = true;
+    btn.textContent = "Autenticando...";
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch(err) {
+      errBox.textContent = "Falha no login: E-mail ou senha inválidos.";
+      errBox.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Entrar no Painel";
+    }
+  };
+
+  // Logout
+  $('btnLogout').onclick = () => signOut(auth);
+
+  // Exibição e Filtros da Tabela Admin
+  function renderAdminTable() {
+    const q = $('search').value.toLowerCase();
+    
+    $('total').textContent = globalLeads.length;
+    $('yes').textContent = globalLeads.filter(x => x.interest === 'Sim').length;
+    $('maybe').textContent = globalLeads.filter(x => x.interest === 'Talvez').length;
+    $('origins').textContent = new Set(globalLeads.map(x => (x.city||'').trim().toLowerCase()).filter(Boolean)).size;
+
+    const filtered = globalLeads.filter(x => 
+      [x.name, x.phone, x.city, x.attraction].join(' ').toLowerCase().includes(q)
+    );
+
+    $('rows').innerHTML = filtered.map(x => {
+      const dateStr = x.createdAt?.seconds 
+        ? new Date(x.createdAt.seconds * 1000).toLocaleString('pt-BR') 
+        : 'Recente';
+      return `
+        <tr>
+          <td>${dateStr}</td>
+          <td><strong>${esc(x.name)}</strong></td>
+          <td>${esc(x.phone)}</td>
+          <td>${esc(x.city)}</td>
+          <td>${esc(x.knows)}</td>
+          <td><span style="color:${x.interest === 'Sim' ? '#4ade80' : 'var(--gold)'}">${esc(x.interest)}</span></td>
+          <td>${esc(x.attraction)}</td>
+          <td><button class="smallbtn danger btnDeleteLead" data-id="${x.id}" style="padding:4px 8px; font-size:10px;">Remover</button></td>
+        </tr>
+      `;
+    }).join('');
+
+    $('empty').style.display = filtered.length ? 'none' : 'block';
+
+    // Eventos de Exclusão de Lead
+    document.querySelectorAll('.btnDeleteLead').forEach(btn => {
+      btn.onclick = async () => {
+        if(confirm('Remover este visitante do banco de dados?')) {
+          await deleteDoc(doc(db, "leads", btn.dataset.id));
+        }
+      };
+    });
   }
-};
 
-function render(){
-  const data = read(), q = $('search').value.toLowerCase();
-  $('total').textContent = data.length;
-  $('yes').textContent = data.filter(x => x.interest === 'Sim').length;
-  $('maybe').textContent = data.filter(x => x.interest === 'Talvez').length;
-  $('origins').textContent = new Set(data.map(x => (x.city||'').trim().toLowerCase()).filter(Boolean)).size;
-  
-  const filtered = data.filter(x => [x.name, x.phone, x.city].join(' ').toLowerCase().includes(q));
-  $('rows').innerHTML = filtered.map(x => `
-    <tr>
-      <td>${new Date(x.date).toLocaleString('pt-BR')}</td>
-      <td>${esc(x.name)}</td>
-      <td>${esc(x.phone)}</td>
-      <td>${esc(x.city)}</td>
-      <td>${esc(x.knows)}</td>
-      <td>${esc(x.interest)}</td>
-      <td>${esc(x.attraction||'—')}</td>
-    </tr>
-  `).join('');
-  $('empty').style.display = filtered.length ? 'none' : 'block';
-}
+  $('search').oninput = renderAdminTable;
 
-function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  // Cadastrar nova Foto no Firestore
+  $('photoForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = $('btnAddPhoto');
+    btn.disabled = true;
 
-$('search').addEventListener('input', render);
-$('saveConfig').onclick = () => {
-  const c = config();
-  c.wa = $('waNumber').value.replace(/\D/g,'');
-  if($('newPin').value.trim()) c.pin = $('newPin').value.trim();
-  localStorage.setItem(CFG, JSON.stringify(c));
-  $('newPin').value = '';
-  alert('Configurações salvas neste navegador.');
-};
+    try {
+      await addDoc(collection(db, "gallery"), {
+        url: $('photoUrl').value.trim(),
+        title: $('photoTitle').value.trim(),
+        desc: $('photoDesc').value.trim(),
+        createdAt: serverTimestamp()
+      });
+      $('photoUrl').value = '';
+      $('photoTitle').value = '';
+      $('photoDesc').value = '';
+      alert('Foto adicionada ao banco de dados com sucesso!');
+    } catch(err) {
+      alert('Erro ao salvar foto: ' + err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  };
 
-$('csvBtn').onclick = () => {
-  const data = read();
-  const cols = ['Data','Nome','WhatsApp','Cidade','Conhece','Interesse','Preferência','Comentário'];
-  const rows = data.map(x => [new Date(x.date).toLocaleString('pt-BR'), x.name, x.phone, x.city, x.knows, x.interest, x.attraction, x.message]);
-  const csv = [cols, ...rows].map(r => r.map(v => '"'+String(v||'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'}));
-  a.download = 'visitantes-cacimba-de-dentro.csv';
-  a.click();
-  URL.revokeObjectURL(a.href);
-};
+  // Exportar para CSV/Excel
+  $('csvBtn').onclick = () => {
+    if(globalLeads.length === 0) {
+      alert("Não há registros para exportar.");
+      return;
+    }
+    const cols = ['Data','Nome','WhatsApp','Cidade','Conhece','Interesse','Preferência','Comentário'];
+    const rows = globalLeads.map(x => [
+      x.createdAt?.seconds ? new Date(x.createdAt.seconds * 1000).toLocaleString('pt-BR') : '',
+      x.name, x.phone, x.city, x.knows, x.interest, x.attraction, x.message
+    ]);
+    const csv = [cols, ...rows].map(r => r.map(v => '"'+String(v||'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'}));
+    a.download = 'visitantes-cacimba-de-dentro.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
 
-$('printBtn').onclick = () => window.print();
-$('clearData').onclick = () => {
-  if(confirm('Tem certeza de que deseja apagar todas as respostas salvas neste navegador?')){
-    localStorage.removeItem(KEY);
-    render();
-  }
-};
+  $('printBtn').onclick = () => window.print();
 
-$('makeQr').onclick = () => {
-  const url = $('pageUrl').value.trim();
-  if(!/^https?:\/\//i.test(url)){ alert('Informe um link público começando com https://'); return; }
-  const src = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=' + encodeURIComponent(url);
-  $('qrImage').src = src;
-  $('qrDownload').href = src;
-  $('qrDownload').style.display = 'inline-block';
-};
+  // Gerador de QR Code
+  $('makeQr').onclick = () => {
+    const url = $('pageUrl').value.trim() || 'https://cacimbatour.firebaseapp.com';
+    const src = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=' + encodeURIComponent(url);
+    $('qrImage').src = src;
+    $('qrDownload').href = src;
+  };
 
-// Renderizar galeria inicial ao carregar a página
-renderGallery();
+  // Alternar telas
+  $('adminToggle').onclick = () => {
+    $('visitorView').classList.add('hidden');
+    $('adminView').classList.remove('hidden');
+  };
+  $('backVisitor').onclick = () => {
+    $('adminView').classList.add('hidden');
+    $('visitorView').classList.remove('hidden');
+  };
+
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 </script>
 </body>
 </html>

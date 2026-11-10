@@ -28,7 +28,8 @@ button { cursor: pointer; }
 .top { background: linear-gradient(135deg, #070f1a, #0e1e32); color: var(--white); padding: 18px 22px; border-bottom: 3px solid var(--gold); }
 .topin { max-width: 1080px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .brand { display: flex; align-items: center; gap: 12px; }
-.seal { width: 44px; height: 44px; border-radius: 12px; background: var(--gold); display: grid; place-items: center; color: #070f1a; font-size: 23px; font-weight: 900; box-shadow: 0 3px 8px rgba(0,0,0,0.3); }
+.seal { width: 44px; height: 44px; border-radius: 12px; background: var(--gold); display: grid; place-items: center; color: #070f1a; font-size: 23px; font-weight: 900; box-shadow: 0 3px 8px rgba(0,0,0,0.3); overflow: hidden; position: relative; }
+.seal img { width: 100%; height: 100%; object-fit: contain; padding: 2px; }
 .brand strong { display: block; font-size: 16px; letter-spacing: .3px; color: var(--white); }
 .brand span { font-size: 12px; color: #94a3b8; }
 .admin-toggle { border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); color: #cbd5e1; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; transition: 0.2s; }
@@ -167,6 +168,16 @@ tr:last-child td { border-bottom: 0; }
   .brand span { display: none; }
   .panel, .gallery-section { padding: 19px; }
 }
+
+@media print {
+  body { background: white; color: black; }
+  .top, .hero, .gallery-section, .layout, .adminhead button, .toolbar, .config, .foot, #loginBox { display: none !important; }
+  #adminView, #dashboard, #insightCard, .configgrid, .tablewrap { display: block !important; border: none !important; background: white !important; color: black !important; }
+  h2, h3, h4, strong, td, th { color: black !important; }
+  .stat { border: 1px solid #ccc !important; background: white !important; }
+  table { min-width: 100%; border: 1px solid #000; }
+  th, td { border: 1px solid #ccc; padding: 6px; }
+}
 </style>
 </head>
 <body>
@@ -174,22 +185,21 @@ tr:last-child td { border-bottom: 0; }
 <header class="top">
   <div class="topin">
     <div class="brand">
-      <div class="seal">C</div>
+      <div class="seal" id="headerLogoSeal"><span id="headerLogoFallback">C</span><img id="headerLogoImg" class="hidden" alt="Logo Cacimba de Dentro"></div>
       <div><strong>CACIMBA DE DENTRO</strong><span>Paraíba • Um convite para conhecer nossa cidade</span></div>
     </div>
     <div style="display:flex; align-items:center; gap:10px;">
-      <span class="db-status"><span class="db-dot"></span> Firebase Conectado</span>
       <button class="admin-toggle" id="adminToggle">Área Administrativa</button>
     </div>
   </div>
 </header>
 
 <main>
-  <!-- TELA DO VISITANTE (ENTRADA DIRETA VIA QR CODE) -->
+  <!-- TELA DO VISITANTE -->
   <section id="visitorView">
-    <div class="hero">
+    <div class="hero" id="heroBanner">
       <div class="eyebrow">Seja bem-vindo(a)!</div>
-      <h1>Já pensou em conhecer Cacimba de Dentro?</h1>
+      <h1>Já pensou em conhecer Cacimba de Dentro - PB?</h1>
       <p>Queremos saber um pouquinho sobre você e descobrir o que despertaria sua vontade de visitar nossa cidade. Leva menos de um minuto!</p>
       <span class="pill">📍 Cacimba de Dentro • Paraíba</span>
     </div>
@@ -330,7 +340,7 @@ tr:last-child td { border-bottom: 0; }
         <button class="smallbtn" id="printBtn">Imprimir Tabela</button>
       </div>
 
-      <!-- NOVO: MÓDULO DE RELATÓRIOS E ANALYTICS DE INTERESSES -->
+      <!-- MÓDULO DE RELATÓRIOS E ANALYTICS DE INTERESSES -->
       <div class="config" style="margin-top:24px; background:#070f1a; padding:20px; border-radius:16px; border:1px solid var(--line);">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
           <div>
@@ -348,32 +358,26 @@ tr:last-child td { border-bottom: 0; }
           </div>
         </div>
 
-        <!-- Card de Insights Automatizados -->
         <div id="insightCard" style="background:linear-gradient(135deg, #132742, #0e1e32); border-left:4px solid var(--gold); padding:16px; border-radius:12px; margin-bottom:20px; font-size:13px; color:#cbd5e1; line-height:1.6;">
           <strong>💡 Insights do Estande:</strong> <span id="insightText">Carregando dados dos visitantes...</span>
         </div>
 
-        <!-- Grid de Gráficos / Distribuições de Interesse -->
         <div class="configgrid" style="grid-template-columns: 1fr 1fr; gap:18px;">
-          <!-- Card 1: Nível de Interesse -->
           <div style="background:#0e1e32; padding:16px; border-radius:12px; border:1px solid var(--line);">
             <h4 style="margin:0 0 12px; font-size:14px; color:var(--white);">Desejo de Visitar Cacimba de Dentro</h4>
             <div id="chartInterest" style="display:flex; flex-direction:column; gap:10px;"></div>
           </div>
 
-          <!-- Card 2: Conhecimento Prévio -->
           <div style="background:#0e1e32; padding:16px; border-radius:12px; border:1px solid var(--line);">
             <h4 style="margin:0 0 12px; font-size:14px; color:var(--white);">Conhecimento Prévio da Cidade</h4>
             <div id="chartKnowledge" style="display:flex; flex-direction:column; gap:10px;"></div>
           </div>
 
-          <!-- Card 3: Tipos de Atração Preferidas -->
           <div style="background:#0e1e32; padding:16px; border-radius:12px; border:1px solid var(--line);">
             <h4 style="margin:0 0 12px; font-size:14px; color:var(--white);">Atrações e Experiências Mais Procuradas</h4>
             <div id="chartAttraction" style="display:flex; flex-direction:column; gap:10px;"></div>
           </div>
 
-          <!-- Card 4: Origem dos Visitantes -->
           <div style="background:#0e1e32; padding:16px; border-radius:12px; border:1px solid var(--line);">
             <h4 style="margin:0 0 12px; font-size:14px; color:var(--white);">Top Cidades de Origem</h4>
             <div id="chartCities" style="display:flex; flex-direction:column; gap:10px;"></div>
@@ -407,19 +411,60 @@ tr:last-child td { border-bottom: 0; }
           </div>
           <div class="field"><label for="photoDesc">Descrição Curta</label><input id="photoDesc" placeholder="Ex: Vista panorâmica e ecoturismo."></div>
           
-          <!-- Container de Preview da imagem selecionada -->
           <div id="filePreviewBox" class="hidden" style="margin-bottom:14px; display:flex; align-items:center; gap:12px; background:#070f1a; padding:10px; border-radius:10px; border:1px solid var(--line);">
             <img id="filePreviewImg" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" src="">
             <span style="font-size:12px; color:#cbd5e1;">Pré-visualização da imagem pronta para envio</span>
           </div>
-
-          <button class="smallbtn" type="submit" id="btnAddPhoto">Adicionar Foto da Galeria</button>
+          <button class="smallbtn" type="submit" id="btnAddPhoto" style="margin-top:4px;">Enviar Foto para Galeria</button>
         </form>
 
         <div style="margin-top:16px;">
-          <h4 style="margin:0 0 8px; font-size:14px; color:var(--white)">Fotos Cadastradas no Banco:</h4>
-          <div id="adminPhotoList" style="display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto; border:1px solid var(--line); padding:10px; border-radius:10px; background:#070f1a;"></div>
+          <h4 style="margin:0 0 8px; font-size:14px; color:var(--white)">Fotos na Galeria</h4>
+          <div id="adminPhotoList" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; border:1px solid var(--line); padding:10px; border-radius:10px; background:#070f1a;"></div>
         </div>
+      </div>
+
+      <!-- GERENCIADOR DE LOGO DA CIDADE NO FIRESTORE -->
+      <div class="config">
+        <h3 style="margin:0 0 6px; color:var(--white)">Gerenciar Logo de Cacimba de Dentro - PB</h3>
+        <p class="sub">Faça o upload da imagem da logo oficial a partir da galeria do seu dispositivo. Ela aparecerá no topo da página em tempo real.</p>
+        
+        <form id="logoForm">
+          <div class="configgrid">
+            <div class="field">
+              <label for="logoFile">Selecione a Imagem da Logo da Galeria *</label>
+              <input id="logoFile" type="file" accept="image/*" required style="padding:8px;">
+            </div>
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div id="logoPreviewBox" style="width:54px; height:54px; border-radius:12px; background:var(--gold); display:grid; place-items:center; overflow:hidden; border:1px solid var(--line);">
+                <span id="logoPreviewFallback" style="font-weight:900; color:#070f1a; font-size:24px;">C</span>
+                <img id="logoPreviewImg" class="hidden" style="width:100%; height:100%; object-fit:contain; padding:2px;" src="">
+              </div>
+              <span style="font-size:12px; color:#cbd5e1;">Pré-visualização da Logo</span>
+            </div>
+          </div>
+          <button class="smallbtn" type="submit" id="btnSaveLogo" style="margin-top:10px;">Atualizar Logo do Topo</button>
+        </form>
+      </div>
+
+      <!-- GERENCIADOR DE FOTO DE FUNDO DO HERO BANNER -->
+      <div class="config">
+        <h3 style="margin:0 0 6px; color:var(--white)">Gerenciar Imagem de Fundo do Banner Principal</h3>
+        <p class="sub">Selecione uma imagem da galeria do seu dispositivo para colocar no fundo do texto "Já pensou em conhecer Cacimba de Dentro - PB".</p>
+        
+        <form id="heroBgForm">
+          <div class="configgrid">
+            <div class="field">
+              <label for="heroBgFile">Selecione a Foto de Fundo da Galeria *</label>
+              <input id="heroBgFile" type="file" accept="image/*" required style="padding:8px;">
+            </div>
+            <div id="heroBgPreviewBox" class="hidden" style="display:flex; align-items:center; gap:12px; background:#070f1a; padding:10px; border-radius:10px; border:1px solid var(--line);">
+              <img id="heroBgPreviewImg" style="width:100px; height:55px; object-fit:cover; border-radius:6px;" src="">
+              <span style="font-size:12px; color:#cbd5e1;">Pré-visualização do Fundo</span>
+            </div>
+          </div>
+          <button class="smallbtn" type="submit" id="btnSaveHeroBg" style="margin-top:10px;">Atualizar Foto de Fundo do Banner</button>
+        </form>
       </div>
 
       <!-- Gerador de QR Code do Estande -->
@@ -456,11 +501,12 @@ tr:last-child td { border-bottom: 0; }
     addDoc, 
     deleteDoc, 
     doc, 
+    setDoc,
     onSnapshot, 
     serverTimestamp 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Configuração do Firebase fornecida
+  // Configuração oficial do Firebase SDK
   const firebaseConfig = {
     apiKey: "AIzaSyAwUCAfE6yzq1O6OFSvBQwATarjVXJ4ixw",
     authDomain: "cacimbatour.firebaseapp.com",
@@ -470,72 +516,89 @@ tr:last-child td { border-bottom: 0; }
     appId: "1:260790394042:web:330ae61117610fd0543683"
   };
 
-  // Inicializa o Firebase e serviços
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Seletores utilitários
   const $ = id => document.getElementById(id);
-  let globalLeads = [];
-  let globalPhotos = [];
-  let currentUser = null;
+  const esc = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  // Escutar Fotos da Galeria em tempo real
-  const galleryRef = collection(db, "gallery");
-  onSnapshot(galleryRef, (snapshot) => {
-    globalPhotos = [];
-    snapshot.forEach(doc => globalPhotos.push({ id: doc.id, ...doc.data() }));
-    renderGallery(globalPhotos);
-    if(currentUser) renderAdminPhotos(globalPhotos);
-  });
+  let currentLeads = [];
+  let currentPhotos = [];
+  let selectedPhotoBase64 = null;
+  let selectedLogoBase64 = null;
+  let selectedHeroBgBase64 = null;
 
-  // Escutar Cadastros de Visitantes (Leads) em tempo real
-  const leadsRef = collection(db, "leads");
-  onSnapshot(leadsRef, (snapshot) => {
-    globalLeads = [];
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      globalLeads.push({ id: doc.id, ...data });
-    });
-    // Ordenar por data mais recente
-    globalLeads.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-    if(currentUser) renderAdminTable();
-  });
-
-  // Renderizar Galeria para Visitante
-  function renderGallery(photos) {
-    const grid = $('galleryGrid');
-    if(!photos || photos.length === 0) {
-      grid.innerHTML = '<div class="empty-gallery">Em breve, fotos de atrativos turísticos de Cacimba de Dentro serão publicadas aqui.</div>';
-      return;
-    }
-    grid.innerHTML = photos.map((p, idx) => `
-      <div class="photo-card" data-idx="${idx}">
-        <div class="photo-img-box">
-          <img src="${esc(p.url)}" alt="${esc(p.title)}" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=500'">
-        </div>
-        <div class="photo-info">
-          <div class="photo-title">${esc(p.title)}</div>
-          <div class="photo-desc">${esc(p.desc || 'Clique para ver em tamanho original')}</div>
-        </div>
-      </div>
-    `).join('');
-
-    // Eventos de clique para abrir a imagem no Modal Lightbox
-    grid.querySelectorAll('.photo-card').forEach(card => {
-      card.onclick = () => {
-        const photo = globalPhotos[card.dataset.idx];
-        if(photo) openLightbox(photo);
+  // Compressão e Redimensionamento de Imagens da Galeria
+  function compressImage(file, maxWidth, maxHeight, quality, callback) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxWidth || h > maxHeight) {
+          if (w / h > maxWidth / maxHeight) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          } else {
+            w = Math.round((w * maxHeight) / h);
+            h = maxHeight;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL('image/jpeg', quality));
       };
-    });
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
-  // Funções do Modal / Lightbox
+  // Preview de Arquivo de Foto Selecionado
+  $('photoFile').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) {
+      compressImage(file, 1000, 1000, 0.8, base64 => {
+        selectedPhotoBase64 = base64;
+        $('filePreviewImg').src = base64;
+        $('filePreviewBox').classList.remove('hidden');
+      });
+    }
+  });
+
+  // Preview de Arquivo de Logo Selecionado
+  $('logoFile').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) {
+      compressImage(file, 400, 400, 0.9, base64 => {
+        selectedLogoBase64 = base64;
+        $('logoPreviewImg').src = base64;
+        $('logoPreviewImg').classList.remove('hidden');
+        $('logoPreviewFallback').classList.add('hidden');
+      });
+    }
+  });
+
+  // Preview de Arquivo de Fundo do Banner Selecionado
+  $('heroBgFile').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) {
+      compressImage(file, 1200, 800, 0.75, base64 => {
+        selectedHeroBgBase64 = base64;
+        $('heroBgPreviewImg').src = base64;
+        $('heroBgPreviewBox').classList.remove('hidden');
+      });
+    }
+  });
+
+  // Modal Lightbox
   function openLightbox(photo) {
     $('lightboxImg').src = photo.url;
     $('lightboxTitle').textContent = photo.title;
-    $('lightboxDesc').textContent = photo.desc || 'Sem descrição adicional.';
+    $('lightboxDesc').textContent = photo.desc || 'Sem descrição cadastrada.';
     $('lightboxModal').classList.add('active');
   }
 
@@ -544,362 +607,394 @@ tr:last-child td { border-bottom: 0; }
   }
 
   $('lightboxClose').onclick = closeLightbox;
-  $('lightboxModal').onclick = (e) => {
-    if(e.target === $('lightboxModal')) closeLightbox();
-  };
-  window.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape') closeLightbox();
+  $('lightboxModal').onclick = e => { if (e.target === $('lightboxModal')) closeLightbox(); };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // Listener em Tempo Real de Configurações (Logo e Fundo do Banner)
+  onSnapshot(doc(db, "config", "site"), docSnap => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.logoUrl) {
+        $('headerLogoImg').src = data.logoUrl;
+        $('headerLogoImg').classList.remove('hidden');
+        $('headerLogoFallback').classList.add('hidden');
+      }
+      if (data.heroBgUrl) {
+        $('heroBanner').style.backgroundImage = `linear-gradient(rgba(14, 30, 50, 0.8), rgba(7, 15, 26, 0.9)), url('${data.heroBgUrl}')`;
+        $('heroBanner').style.backgroundSize = 'cover';
+        $('heroBanner').style.backgroundPosition = 'center';
+      }
+    }
   });
 
-  // Renderizar Lista da Galeria no Painel Admin
-  function renderAdminPhotos(photos) {
-    const list = $('adminPhotoList');
-    if(!photos || photos.length === 0) {
-      list.innerHTML = '<span style="font-size:12px; color:var(--muted)">Nenhuma foto cadastrada no banco.</span>';
+  // Listener em Tempo Real da Galeria no Firestore
+  onSnapshot(collection(db, "gallery"), snapshot => {
+    currentPhotos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderGallery();
+    renderAdminPhotos();
+  });
+
+  function renderGallery() {
+    const grid = $('galleryGrid');
+    if (currentPhotos.length === 0) {
+      grid.innerHTML = '<div class="empty-gallery">Em breve, novas fotos e paisagens de Cacimba de Dentro serão publicadas aqui.</div>';
       return;
     }
-    list.innerHTML = photos.map(p => `
-      <div style="display:flex; align-items:center; justify-content:space-between; background:#0e1e32; padding:8px 12px; border:1px solid var(--line); border-radius:8px; gap:10px;">
-        <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
-          <img src="${esc(p.url)}" style="width:36px; height:36px; object-fit:cover; border-radius:6px;" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=100'">
-          <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px;">
-            <strong style="color:white;">${esc(p.title)}</strong><br><span style="color:var(--muted); font-size:11px;">${esc(p.desc || '')}</span>
-          </div>
+    grid.innerHTML = currentPhotos.map(p => `
+      <div class="photo-card" data-id="${p.id}">
+        <div class="photo-img-box">
+          <img src="${esc(p.url)}" alt="${esc(p.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=500'">
         </div>
-        <button class="smallbtn danger btnDeletePhoto" data-id="${p.id}" style="padding:6px 10px; font-size:11px;">Excluir</button>
+        <div class="photo-info">
+          <div class="photo-title"><span>${esc(p.title)}</span></div>
+          <div class="photo-desc">${esc(p.desc)}</div>
+        </div>
       </div>
     `).join('');
 
-    // Eventos de exclusão de fotos
-    document.querySelectorAll('.btnDeletePhoto').forEach(btn => {
+    grid.querySelectorAll('.photo-card').forEach(card => {
+      card.onclick = () => {
+        const p = currentPhotos.find(item => item.id === card.dataset.id);
+        if (p) openLightbox(p);
+      };
+    });
+  }
+
+  function renderAdminPhotos() {
+    const list = $('adminPhotoList');
+    if (currentPhotos.length === 0) {
+      list.innerHTML = '<span style="font-size:12px; color:var(--muted)">Nenhuma foto cadastrada na galeria.</span>';
+      return;
+    }
+    list.innerHTML = currentPhotos.map(p => `
+      <div style="display:flex; align-items:center; justify-content:space-between; background:#0e1e32; padding:8px 12px; border:1px solid var(--line); border-radius:8px; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+          <img src="${esc(p.url)}" style="width:36px; height:36px; object-fit:cover; border-radius:6px;">
+          <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px;">
+            <strong style="color:white;">${esc(p.title)}</strong><br><span style="color:var(--muted); font-size:11px;">${esc(p.desc)}</span>
+          </div>
+        </div>
+        <button class="smallbtn danger" style="padding:6px 10px; font-size:11px;" data-del="${p.id}">Remover</button>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('[data-del]').forEach(btn => {
       btn.onclick = async () => {
-        if(confirm('Deseja remover esta foto da galeria?')) {
-          await deleteDoc(doc(db, "gallery", btn.dataset.id));
+        if (confirm('Deseja remover esta foto da galeria?')) {
+          await deleteDoc(doc(db, "gallery", btn.dataset.del));
         }
       };
     });
   }
 
-  // Submeter formulário do visitante para o Firestore
-  $('leadForm').onsubmit = async (e) => {
+  // Adicionar Foto
+  $('photoForm').addEventListener('submit', async e => {
     e.preventDefault();
-    if(!$('consent').checked) return;
+    const title = $('photoTitle').value.trim();
+    const desc = $('photoDesc').value.trim();
+    
+    if (!selectedPhotoBase64 || !title) {
+      alert('Por favor, selecione uma imagem da galeria e informe o título.');
+      return;
+    }
+
+    const btn = $('btnAddPhoto');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    try {
+      await addDoc(collection(db, "gallery"), {
+        url: selectedPhotoBase64,
+        title,
+        desc: desc || 'Atração turística',
+        createdAt: serverTimestamp()
+      });
+      $('photoForm').reset();
+      selectedPhotoBase64 = null;
+      $('filePreviewBox').classList.add('hidden');
+      alert('Foto adicionada com sucesso à galeria!');
+    } catch (err) {
+      alert('Erro ao enviar imagem: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Enviar Foto para Galeria';
+    }
+  });
+
+  // Salvar Logo da Cidade
+  $('logoForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!selectedLogoBase64) {
+      alert('Selecione um arquivo de imagem para a logo.');
+      return;
+    }
+
+    const btn = $('btnSaveLogo');
+    btn.disabled = true;
+    btn.textContent = 'Atualizando...';
+
+    try {
+      await setDoc(doc(db, "config", "site"), {
+        logoUrl: selectedLogoBase64,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      alert('Logo da cidade atualizada com sucesso!');
+    } catch (err) {
+      alert('Erro ao atualizar a logo: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Atualizar Logo do Topo';
+    }
+  });
+
+  // Salvar Imagem de Fundo do Banner Principal
+  $('heroBgForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!selectedHeroBgBase64) {
+      alert('Selecione uma imagem de fundo da galeria.');
+      return;
+    }
+
+    const btn = $('btnSaveHeroBg');
+    btn.disabled = true;
+    btn.textContent = 'Atualizando Fundo...';
+
+    try {
+      await setDoc(doc(db, "config", "site"), {
+        heroBgUrl: selectedHeroBgBase64,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      alert('Foto de fundo do banner atualizada com sucesso!');
+    } catch (err) {
+      alert('Erro ao atualizar a imagem de fundo: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Atualizar Foto de Fundo do Banner';
+    }
+  });
+
+  // Envios do Formulário de Visitante (Leads)
+  $('leadForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!$('consent').checked) return;
 
     const btn = $('btnSubmitLead');
     btn.disabled = true;
-    btn.textContent = "Salvando no banco de dados...";
+    btn.textContent = 'Gravando no banco...';
 
+    const fd = new FormData(e.target);
+    const item = Object.fromEntries(fd.entries());
+    
     try {
-      const formData = new FormData(e.target);
-      const leadData = {
-        name: formData.get('name').trim(),
-        phone: formData.get('phone').trim(),
-        city: formData.get('city').trim(),
-        knows: formData.get('knows'),
-        interest: formData.get('interest'),
-        attraction: formData.get('attraction') || 'Não informado',
-        message: formData.get('message') || '',
-        createdAt: serverTimestamp()
-      };
-
-      await addDoc(collection(db, "leads"), leadData);
-
+      await addDoc(collection(db, "leads"), {
+        name: item.name.trim(),
+        phone: item.phone.trim(),
+        city: item.city.trim(),
+        knows: item.knows,
+        interest: item.interest,
+        attraction: item.attraction || 'Não informado',
+        message: item.message || '',
+        createdAt: serverTimestamp(),
+        dateStr: new Date().toISOString()
+      });
       $('formPanel').classList.add('hidden');
       $('successPanel').classList.remove('hidden');
-    } catch(err) {
-      alert("Erro ao salvar dados no Firebase: " + err.message);
+    } catch (err) {
+      alert('Erro ao salvar respostas: ' + err.message);
       btn.disabled = false;
-      btn.textContent = "Enviar respostas e confirmar presença";
+      btn.textContent = 'Enviar respostas e confirmar presença';
     }
-  };
+  });
 
-  // Gerenciamento de Autenticação Firebase
-  onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    if(user) {
+  // Autenticação Firebase Auth
+  onAuthStateChanged(auth, user => {
+    if (user) {
       $('loginBox').classList.add('hidden');
       $('dashboard').classList.remove('hidden');
       $('userEmailDisplay').textContent = user.email;
-      renderAdminTable();
+      listenToLeads();
     } else {
       $('loginBox').classList.remove('hidden');
       $('dashboard').classList.add('hidden');
     }
   });
 
-  // Login do Administrador
-  $('loginForm').onsubmit = async (e) => {
+  $('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
     const email = $('adminEmail').value.trim();
-    const password = $('adminPassword').value.trim();
+    const pass = $('adminPassword').value;
     const errBox = $('loginError');
-    const btn = $('btnLogin');
-
     errBox.classList.add('hidden');
-    btn.disabled = true;
-    btn.textContent = "Autenticando...";
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch(err) {
-      errBox.textContent = "Falha no login: E-mail ou senha inválidos.";
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch (err) {
+      errBox.textContent = 'Falha na autenticação: Verifique e-mail e senha.';
       errBox.classList.remove('hidden');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Entrar no Painel";
     }
-  };
+  });
 
-  // Logout
   $('btnLogout').onclick = () => signOut(auth);
 
-  // Exibição e Filtros da Tabela Admin
-  function renderAdminTable() {
-    const q = $('search').value.toLowerCase();
-    
-    $('total').textContent = globalLeads.length;
-    $('yes').textContent = globalLeads.filter(x => x.interest === 'Sim').length;
-    $('maybe').textContent = globalLeads.filter(x => x.interest === 'Talvez').length;
-    $('origins').textContent = new Set(globalLeads.map(x => (x.city||'').trim().toLowerCase()).filter(Boolean)).size;
+  // Listener dos Leads
+  let unsubscribeLeads = null;
+  function listenToLeads() {
+    if (unsubscribeLeads) return;
+    unsubscribeLeads = onSnapshot(collection(db, "leads"), snapshot => {
+      currentLeads = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      currentLeads.sort((a, b) => (b.dateStr || '').localeCompare(a.dateStr || ''));
+      renderDashboard();
+    });
+  }
 
-    const filtered = globalLeads.filter(x => 
-      [x.name, x.phone, x.city, x.attraction].join(' ').toLowerCase().includes(q)
-    );
+  // Filtragem e Renderização do Relatório
+  function getFilteredLeads() {
+    const filter = $('reportFilter').value;
+    const now = new Date();
+    
+    return currentLeads.filter(x => {
+      if (filter === 'all') return true;
+      const d = x.createdAt?.toDate ? x.createdAt.toDate() : new Date(x.dateStr || 0);
+      if (filter === 'today') {
+        return d.toDateString() === now.toDateString();
+      }
+      if (filter === '7days') {
+        return (now - d) <= 7 * 24 * 60 * 60 * 1000;
+      }
+      if (filter === '30days') {
+        return (now - d) <= 30 * 24 * 60 * 60 * 1000;
+      }
+      return true;
+    });
+  }
+
+  function renderBar(label, count, total) {
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    return `
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+          <span style="color:#cbd5e1;">${esc(label)}</span>
+          <span style="color:var(--gold); font-weight:700;">${count} (${pct}%)</span>
+        </div>
+        <div style="background:#070f1a; height:8px; border-radius:4px; overflow:hidden; border:1px solid var(--line);">
+          <div style="background:var(--gold); width:${pct}%; height:100%; border-radius:4px; transition:width 0.4s;"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderReports() {
+    const data = getFilteredLeads();
+    const total = data.length;
+
+    // Métricas Gerais
+    $('total').textContent = total;
+    $('yes').textContent = data.filter(x => x.interest === 'Sim').length;
+    $('maybe').textContent = data.filter(x => x.interest === 'Talvez').length;
+    $('origins').textContent = new Set(data.map(x => (x.city||'').trim().toLowerCase()).filter(Boolean)).size;
+
+    if (total === 0) {
+      $('insightText').textContent = 'Nenhum dado registrado para o período selecionado.';
+      $('chartInterest').innerHTML = '<span style="font-size:12px; color:var(--muted)">Sem dados.</span>';
+      $('chartKnowledge').innerHTML = '<span style="font-size:12px; color:var(--muted)">Sem dados.</span>';
+      $('chartAttraction').innerHTML = '<span style="font-size:12px; color:var(--muted)">Sem dados.</span>';
+      $('chartCities').innerHTML = '<span style="font-size:12px; color:var(--muted)">Sem dados.</span>';
+      return;
+    }
+
+    // 1. Desejo de Visitar
+    const yesCount = data.filter(x => x.interest === 'Sim').length;
+    const maybeCount = data.filter(x => x.interest === 'Talvez').length;
+    const noCount = data.filter(x => x.interest === 'Não no momento').length;
+
+    $('chartInterest').innerHTML = 
+      renderBar('Sim, gostaria de conhecer', yesCount, total) +
+      renderBar('Talvez / Quer mais informações', maybeCount, total) +
+      renderBar('Não no momento', noCount, total);
+
+    // 2. Conhecimento Prévio
+    const kYes = data.filter(x => x.knows === 'Sim, já conheço').length;
+    const kHeard = data.filter(x => x.knows === 'Já ouvi falar').length;
+    const kNo = data.filter(x => x.knows === 'Não conheço').length;
+
+    $('chartKnowledge').innerHTML = 
+      renderBar('Já conhecem a cidade', kYes, total) +
+      renderBar('Já ouviram falar', kHeard, total) +
+      renderBar('Nunca ouviram falar', kNo, total);
+
+    // 3. Atrações Preferidas
+    const attractions = {};
+    data.forEach(x => {
+      const attr = x.attraction || 'Não especificado';
+      attractions[attr] = (attractions[attr] || 0) + 1;
+    });
+    const topAttrs = Object.entries(attractions).sort((a,b) => b[1] - a[1]);
+    $('chartAttraction').innerHTML = topAttrs.slice(0, 5).map(([label, count]) => renderBar(label, count, total)).join('');
+
+    // 4. Origem dos Visitantes
+    const cities = {};
+    data.forEach(x => {
+      const c = (x.city || 'Desconhecida').trim();
+      cities[c] = (cities[c] || 0) + 1;
+    });
+    const topCities = Object.entries(cities).sort((a,b) => b[1] - a[1]);
+    $('chartCities').innerHTML = topCities.slice(0, 5).map(([label, count]) => renderBar(label, count, total)).join('');
+
+    // Gerar Insight Automático
+    const mainCity = topCities[0] ? topCities[0][0] : 'N/A';
+    const mainAttr = topAttrs[0] ? topAttrs[0][0] : 'N/A';
+    const conversion = Math.round(((yesCount + maybeCount) / total) * 100);
+
+    $('insightText').innerHTML = `
+      Neste período, <strong>${conversion}%</strong> dos visitantes demonstraram interesse direto ou potencial em visitar a cidade. 
+      A principal cidade de origem do público foi <strong>${esc(mainCity)}</strong> e o maior interesse temático foi por <strong>${esc(mainAttr)}</strong>.
+    `;
+  }
+
+  function renderDashboard() {
+    renderReports();
+
+    const q = $('search').value.toLowerCase();
+    const filtered = currentLeads.filter(x => [x.name, x.phone, x.city].join(' ').toLowerCase().includes(q));
 
     $('rows').innerHTML = filtered.map(x => {
-      const dateStr = x.createdAt?.seconds 
-        ? new Date(x.createdAt.seconds * 1000).toLocaleString('pt-BR') 
-        : 'Recente';
+      const dateVal = x.createdAt?.toDate ? x.createdAt.toDate().toLocaleString('pt-BR') : (x.dateStr ? new Date(x.dateStr).toLocaleString('pt-BR') : '—');
       return `
         <tr>
-          <td>${dateStr}</td>
-          <td><strong>${esc(x.name)}</strong></td>
+          <td>${dateVal}</td>
+          <td>${esc(x.name)}</td>
           <td>${esc(x.phone)}</td>
           <td>${esc(x.city)}</td>
           <td>${esc(x.knows)}</td>
-          <td><span style="color:${x.interest === 'Sim' ? '#4ade80' : 'var(--gold)'}">${esc(x.interest)}</span></td>
+          <td>${esc(x.interest)}</td>
           <td>${esc(x.attraction)}</td>
-          <td><button class="smallbtn danger btnDeleteLead" data-id="${x.id}" style="padding:4px 8px; font-size:10px;">Remover</button></td>
+          <td><button class="smallbtn danger" style="padding:4px 8px; font-size:11px;" data-dellead="${x.id}">Excluir</button></td>
         </tr>
       `;
     }).join('');
 
     $('empty').style.display = filtered.length ? 'none' : 'block';
 
-    // Renderizar Relatório Analítico
-    renderAnalyticsReport();
-
-    // Eventos de Exclusão de Lead
-    document.querySelectorAll('.btnDeleteLead').forEach(btn => {
+    $('rows').querySelectorAll('[data-dellead]').forEach(btn => {
       btn.onclick = async () => {
-        if(confirm('Remover este visitante do banco de dados?')) {
-          await deleteDoc(doc(db, "leads", btn.dataset.id));
+        if (confirm('Deseja excluir este registro de visitante?')) {
+          await deleteDoc(doc(db, "leads", btn.dataset.dellead));
         }
       };
     });
   }
 
-  // NOVA FUNÇÃO: Geração dos Gráficos e Analytics de Interesses
-  function renderAnalyticsReport() {
-    const period = $('reportFilter').value;
-    const now = Date.now();
-    
-    // Filtragem por Período
-    const filteredLeads = globalLeads.filter(x => {
-      if(!x.createdAt?.seconds) return true;
-      const time = x.createdAt.seconds * 1000;
-      if(period === 'today') {
-        const startOfDay = new Date().setHours(0,0,0,0);
-        return time >= startOfDay;
-      }
-      if(period === '7days') return time >= now - (7 * 86400000);
-      if(period === '30days') return time >= now - (30 * 86400000);
-      return true;
-    });
+  // Eventos do Relatório
+  $('reportFilter').addEventListener('change', renderReports);
+  $('search').addEventListener('input', renderDashboard);
 
-    const total = filteredLeads.length;
+  $('printReportBtn').onclick = () => window.print();
+  $('printBtn').onclick = () => window.print();
 
-    if(total === 0) {
-      $('insightText').textContent = "Sem dados de visitantes para o período selecionado.";
-      $('chartInterest').innerHTML = '<span style="font-size:12px; color:var(--muted)">Nenhum dado registrado.</span>';
-      $('chartKnowledge').innerHTML = '<span style="font-size:12px; color:var(--muted)">Nenhum dado registrado.</span>';
-      $('chartAttraction').innerHTML = '<span style="font-size:12px; color:var(--muted)">Nenhum dado registrado.</span>';
-      $('chartCities').innerHTML = '<span style="font-size:12px; color:var(--muted)">Nenhum dado registrado.</span>';
-      return;
-    }
-
-    // Calculadores de Frequência
-    const calcFreq = (key) => {
-      const counts = {};
-      filteredLeads.forEach(item => {
-        const val = (item[key] || 'Não informado').trim();
-        counts[val] = (counts[val] || 0) + 1;
-      });
-      return counts;
-    };
-
-    const interestCounts = calcFreq('interest');
-    const knowledgeCounts = calcFreq('knows');
-    const attractionCounts = calcFreq('attraction');
-    const cityCounts = calcFreq('city');
-
-    // Helper para gerar barras visuais
-    const renderBar = (label, count, color = 'var(--gold)') => {
-      const pct = Math.round((count / total) * 100);
-      return `
-        <div style="font-size:12px;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:#cbd5e1;">
-            <span>${esc(label)}</span>
-            <strong>${count} (${pct}%)</strong>
-          </div>
-          <div style="background:#070f1a; height:8px; border-radius:4px; overflow:hidden; border:1px solid var(--line);">
-            <div style="background:${color}; width:${pct}%; height:100%; transition: width 0.4s ease;"></div>
-          </div>
-        </div>
-      `;
-    };
-
-    // Renderizar Gráficos
-    $('chartInterest').innerHTML = Object.entries(interestCounts)
-      .map(([k, v]) => renderBar(k, v, k === 'Sim' ? '#4ade80' : k === 'Talvez' ? '#f59e0b' : '#ef4444')).join('');
-
-    $('chartKnowledge').innerHTML = Object.entries(knowledgeCounts)
-      .map(([k, v]) => renderBar(k, v, '#3b82f6')).join('');
-
-    $('chartAttraction').innerHTML = Object.entries(attractionCounts)
-      .sort((a,b) => b[1] - a[1])
-      .map(([k, v]) => renderBar(k, v, 'var(--gold)')).join('');
-
-    $('chartCities').innerHTML = Object.entries(cityCounts)
-      .sort((a,b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([k, v]) => renderBar(k, v, '#a855f7')).join('');
-
-    // Insight Automatizado
-    const topInterest = Object.entries(interestCounts).sort((a,b) => b[1] - a[1])[0] || ['Sim', 0];
-    const topAttraction = Object.entries(attractionCounts).sort((a,b) => b[1] - a[1])[0] || ['Nenhuma', 0];
-    const topCity = Object.entries(cityCounts).sort((a,b) => b[1] - a[1])[0] || ['Desconhecida', 0];
-    
-    const simPct = Math.round(((interestCounts['Sim'] || 0) / total) * 100);
-
-    $('insightText').innerHTML = `
-      Neste período foram registrados <strong>${total} visitantes</strong>. 
-      <strong>${simPct}%</strong> demonstram alto interesse em visitar a cidade. 
-      A atração mais procurada é <strong>"${topAttraction[0]}"</strong> e a principal cidade de origem dos visitantes é <strong>"${topCity[0]}"</strong>.
-    `;
-  }
-
-  $('reportFilter').onchange = renderAnalyticsReport;
-
-  // Imprimir Relatório Executivo Formatado
-  $('printReportBtn').onclick = () => {
-    window.print();
-  };
-
-  $('search').oninput = renderAdminTable;
-
-  // Função auxiliar para comprimir e converter imagem do arquivo local em Base64
-  function processLocalImage(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxDim = 800; // Resolução otimizada para web e storage
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > maxDim) {
-              height *= maxDim / width;
-              width = maxDim;
-            }
-          } else {
-            if (height > maxDim) {
-              width *= maxDim / height;
-              height = maxDim;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.75));
-        };
-        img.onerror = reject;
-        img.src = e.target.result;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // Preview da Imagem Selecionada do Dispositivo
-  let currentBase64Image = null;
-  $('photoFile').onchange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        currentBase64Image = await processLocalImage(file);
-        $('filePreviewImg').src = currentBase64Image;
-        $('filePreviewBox').classList.remove('hidden');
-      } catch (err) {
-        alert("Erro ao processar imagem: " + err.message);
-        currentBase64Image = null;
-        $('filePreviewBox').classList.add('hidden');
-      }
-    } else {
-      currentBase64Image = null;
-      $('filePreviewBox').classList.add('hidden');
-    }
-  };
-
-  // Cadastrar nova Foto do arquivo local no Firestore
-  $('photoForm').onsubmit = async (e) => {
-    e.preventDefault();
-    if (!currentBase64Image) {
-      alert("Por favor, selecione uma imagem do seu dispositivo.");
-      return;
-    }
-
-    const btn = $('btnAddPhoto');
-    btn.disabled = true;
-    btn.textContent = "Processando e enviando...";
-
-    try {
-      await addDoc(collection(db, "gallery"), {
-        url: currentBase64Image,
-        title: $('photoTitle').value.trim(),
-        desc: $('photoDesc').value.trim(),
-        createdAt: serverTimestamp()
-      });
-
-      $('photoFile').value = '';
-      $('photoTitle').value = '';
-      $('photoDesc').value = '';
-      $('filePreviewBox').classList.add('hidden');
-      currentBase64Image = null;
-
-      alert('Foto adicionada da galeria ao banco de dados com sucesso!');
-    } catch(err) {
-      alert('Erro ao salvar foto: ' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Adicionar Foto da Galeria";
-    }
-  };
-
-  // Exportar para CSV/Excel
   $('csvBtn').onclick = () => {
-    if(globalLeads.length === 0) {
-      alert("Não há registros para exportar.");
-      return;
-    }
     const cols = ['Data','Nome','WhatsApp','Cidade','Conhece','Interesse','Preferência','Comentário'];
-    const rows = globalLeads.map(x => [
-      x.createdAt?.seconds ? new Date(x.createdAt.seconds * 1000).toLocaleString('pt-BR') : '',
+    const rows = currentLeads.map(x => [
+      x.createdAt?.toDate ? x.createdAt.toDate().toLocaleString('pt-BR') : (x.dateStr || ''),
       x.name, x.phone, x.city, x.knows, x.interest, x.attraction, x.message
     ]);
     const csv = [cols, ...rows].map(r => r.map(v => '"'+String(v||'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
@@ -910,27 +1005,25 @@ tr:last-child td { border-bottom: 0; }
     URL.revokeObjectURL(a.href);
   };
 
-  $('printBtn').onclick = () => window.print();
-
-  // Gerador de QR Code
-  $('makeQr').onclick = () => {
-    const url = $('pageUrl').value.trim() || 'https://cacimbatour.firebaseapp.com';
-    const src = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=' + encodeURIComponent(url);
-    $('qrImage').src = src;
-    $('qrDownload').href = src;
-  };
-
-  // Alternar telas
+  // Alternância de Telas
   $('adminToggle').onclick = () => {
     $('visitorView').classList.add('hidden');
     $('adminView').classList.remove('hidden');
   };
+
   $('backVisitor').onclick = () => {
     $('adminView').classList.add('hidden');
     $('visitorView').classList.remove('hidden');
   };
 
-  function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  // Gerador de QR Code
+  $('makeQr').onclick = () => {
+    const url = $('pageUrl').value.trim();
+    if (!/^https?:\/\//i.test(url)) { alert('Informe um link público começando com https://'); return; }
+    const src = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=' + encodeURIComponent(url);
+    $('qrImage').src = src;
+    $('qrDownload').href = src;
+  };
 </script>
 </body>
 </html>

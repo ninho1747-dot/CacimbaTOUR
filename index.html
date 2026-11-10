@@ -240,16 +240,11 @@ tr:last-child td { border-bottom: 0; }
         <form id="leadForm">
           <div class="grid2">
             <div class="field"><label for="name">Seu nome *</label><input id="name" name="name" autocomplete="name" required placeholder="Como podemos chamar você?"></div>
-            <div class="field"><label for="phone">WhatsApp com DDD *</label><input id="phone" name="phone" inputmode="tel" autocomplete="tel" required placeholder="(83) 99999-9999"></div>
+            <div class="field"><label for="cpf">CPF *</label><input id="cpf" name="cpf" inputmode="numeric" required placeholder="000.000.000-00"></div>
           </div>
-          <div class="field"><label for="city">Em qual cidade você mora? *</label><input id="city" name="city" required placeholder="Sua cidade e estado"></div>
-          <div class="field">
-            <label>Você já conhece Cacimba de Dentro? *</label>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="knows" value="Sim, já conheço" required> Sim, já conheço</label>
-              <label class="choice"><input type="radio" name="knows" value="Já ouvi falar"> Já ouvi falar, mas nunca visitei</label>
-              <label class="choice"><input type="radio" name="knows" value="Não conheço"> Ainda não conheço</label>
-            </div>
+          <div class="grid2">
+            <div class="field"><label for="phone">WhatsApp com DDD *</label><input id="phone" name="phone" inputmode="tel" autocomplete="tel" required placeholder="(83) 99999-9999"></div>
+            <div class="field"><label for="city">Em qual cidade você mora? *</label><input id="city" name="city" required placeholder="Sua cidade e estado"></div>
           </div>
           <div class="field">
             <label>Você teria interesse em visitar Cacimba de Dentro? *</label>
@@ -387,7 +382,7 @@ tr:last-child td { border-bottom: 0; }
 
       <div class="tablewrap" style="margin-top:20px;">
         <table>
-          <thead><tr><th>Data/Hora</th><th>Nome</th><th>WhatsApp</th><th>Cidade</th><th>Conhece?</th><th>Interesse</th><th>Preferência</th><th>Ação</th></tr></thead>
+          <thead><tr><th>Data/Hora</th><th>Nome</th><th>CPF</th><th>WhatsApp</th><th>Cidade</th><th>Conhece?</th><th>Interesse</th><th>Preferência</th><th>Ação</th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
         <div id="empty" class="empty">Nenhum registro encontrado no banco de dados.</div>
@@ -788,6 +783,7 @@ tr:last-child td { border-bottom: 0; }
     try {
       await addDoc(collection(db, "leads"), {
         name: item.name.trim(),
+        cpf: item.cpf.trim(),
         phone: item.phone.trim(),
         city: item.city.trim(),
         knows: item.knows,
@@ -955,7 +951,7 @@ tr:last-child td { border-bottom: 0; }
     renderReports();
 
     const q = $('search').value.toLowerCase();
-    const filtered = currentLeads.filter(x => [x.name, x.phone, x.city].join(' ').toLowerCase().includes(q));
+    const filtered = currentLeads.filter(x => [x.name, x.cpf, x.phone, x.city].join(' ').toLowerCase().includes(q));
 
     $('rows').innerHTML = filtered.map(x => {
       const dateVal = x.createdAt?.toDate ? x.createdAt.toDate().toLocaleString('pt-BR') : (x.dateStr ? new Date(x.dateStr).toLocaleString('pt-BR') : '—');
@@ -963,6 +959,7 @@ tr:last-child td { border-bottom: 0; }
         <tr>
           <td>${dateVal}</td>
           <td>${esc(x.name)}</td>
+          <td>${esc(x.cpf || '—')}</td>
           <td>${esc(x.phone)}</td>
           <td>${esc(x.city)}</td>
           <td>${esc(x.knows)}</td>
@@ -992,10 +989,10 @@ tr:last-child td { border-bottom: 0; }
   $('printBtn').onclick = () => window.print();
 
   $('csvBtn').onclick = () => {
-    const cols = ['Data','Nome','WhatsApp','Cidade','Conhece','Interesse','Preferência','Comentário'];
+    const cols = ['Data','Nome','CPF','WhatsApp','Cidade','Conhece','Interesse','Preferência','Comentário'];
     const rows = currentLeads.map(x => [
       x.createdAt?.toDate ? x.createdAt.toDate().toLocaleString('pt-BR') : (x.dateStr || ''),
-      x.name, x.phone, x.city, x.knows, x.interest, x.attraction, x.message
+      x.name, x.cpf || '', x.phone, x.city, x.knows, x.interest, x.attraction, x.message
     ]);
     const csv = [cols, ...rows].map(r => r.map(v => '"'+String(v||'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
     const a = document.createElement('a');

@@ -247,6 +247,14 @@ tr:last-child td { border-bottom: 0; }
             <div class="field"><label for="city">Em qual cidade você mora? *</label><input id="city" name="city" required placeholder="Sua cidade e estado"></div>
           </div>
           <div class="field">
+            <label>Você já conhece Cacimba de Dentro? *</label>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="knows" value="Sim, já conheço" required> Sim, já conheço</label>
+              <label class="choice"><input type="radio" name="knows" value="Já ouvi falar"> Já ouvi falar, mas nunca visitei</label>
+              <label class="choice"><input type="radio" name="knows" value="Não conheço"> Ainda não conheço</label>
+            </div>
+          </div>
+          <div class="field">
             <label>Você teria interesse em visitar Cacimba de Dentro? *</label>
             <div class="choices">
               <label class="choice"><input type="radio" name="interest" value="Sim" required> Sim, gostaria de conhecer!</label>
@@ -782,12 +790,12 @@ tr:last-child td { border-bottom: 0; }
     
     try {
       await addDoc(collection(db, "leads"), {
-        name: item.name.trim(),
-        cpf: item.cpf.trim(),
-        phone: item.phone.trim(),
-        city: item.city.trim(),
-        knows: item.knows,
-        interest: item.interest,
+        name: (item.name || '').trim(),
+        cpf: (item.cpf || '').trim(),
+        phone: (item.phone || '').trim(),
+        city: (item.city || '').trim(),
+        knows: item.knows || 'Não especificado',
+        interest: item.interest || 'Não especificado',
         attraction: item.attraction || 'Não informado',
         message: item.message || '',
         createdAt: serverTimestamp(),

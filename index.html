@@ -475,11 +475,14 @@ tr:last-child td { border-bottom: 0; }
         <h3 style="margin:0 0 6px; color:var(--white)">QR Code Oficial do Estande</h3>
         <p class="sub">Cole o link da página hospedada para gerar o QR Code de divulgação.</p>
         <div class="qrbox">
-          <img id="qrImage" alt="QR Code da página" src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=https://cacimbatour.firebaseapp.com">
+          <img id="qrImage" alt="QR Code da página" src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=https://cacimbatour.firebaseapp.com%23formPanel">
           <div style="flex:1;min-width:200px">
             <div class="field"><label for="pageUrl">Link Público da Aplicação</label><input id="pageUrl" placeholder="https://seu-dominio.com"></div>
-            <button class="smallbtn" id="makeQr">Gerar QR Code</button>
-            <a id="qrDownload" class="smallbtn" style="display:inline-block; margin-top:8px; text-decoration:none; color:var(--gold)" download="qrcode-cacimba.png" target="_blank">Baixar QR Code</a>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+              <button class="smallbtn" id="makeQr">Gerar QR Code</button>
+              <button class="smallbtn" id="btnFixCurrentUrl" style="background:var(--blue-accent); color:white; border:none;">Fixar Link Atual</button>
+              <a id="qrDownload" class="smallbtn" style="display:inline-block; text-decoration:none; color:var(--gold)" download="qrcode-cacimba.png" target="_blank">Baixar QR Code</a>
+            </div>
           </div>
         </div>
       </div>
@@ -1021,13 +1024,31 @@ tr:last-child td { border-bottom: 0; }
     $('visitorView').classList.remove('hidden');
   };
 
-  // Gerador de QR Code
+  // Função para formatar o link direcionando direto ao formulário
+  function formatFormUrl(urlStr) {
+    let cleanUrl = urlStr.trim().split('#')[0];
+    return cleanUrl + '#formPanel';
+  }
+
+  // Gerador de QR Code com ancoragem direta para o formulário
+  function generateQrCode(targetUrl) {
+    const finalUrl = formatFormUrl(targetUrl);
+    $('pageUrl').value = finalUrl;
+    const src = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=' + encodeURIComponent(finalUrl);
+    $('qrImage').src = src;
+    $('qrDownload').href = src;
+  }
+
   $('makeQr').onclick = () => {
     const url = $('pageUrl').value.trim();
     if (!/^https?:\/\//i.test(url)) { alert('Informe um link público começando com https://'); return; }
-    const src = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&format=png&data=' + encodeURIComponent(url);
-    $('qrImage').src = src;
-    $('qrDownload').href = src;
+    generateQrCode(url);
+  };
+
+  // Botão para fixar o link da aplicação atual no formulário
+  $('btnFixCurrentUrl').onclick = () => {
+    const currentBaseUrl = window.location.origin + window.location.pathname;
+    generateQrCode(currentBaseUrl);
   };
 </script>
 </body>
